@@ -18,6 +18,7 @@ export default function Transaction() {
 
   const items = useLiveQuery(() => db.items.toArray(), []) || [];
   const customers = useLiveQuery(() => db.customers.toArray(), []) || [];
+  const transactions = useLiveQuery(() => db.transactions.toArray(), []) || [];
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
@@ -233,7 +234,7 @@ export default function Transaction() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 flex-1 items-start">
         {/* Left Column (Material Grid) */}
         <div className="lg:col-span-7 xl:col-span-8 w-full">
-          <ItemGrid items={items} onSelectItem={handleSelectItem} />
+          <ItemGrid items={items} transactions={transactions} onSelectItem={handleSelectItem} />
         </div>
 
         {/* Right Column: Permanent Cart & Pay for Tablet/Desktop */}
