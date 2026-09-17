@@ -59,24 +59,39 @@ export default function NumpadModal({
     }
   }, [isOpen, initialData]);
 
-  // Audio feedback ringan
-  const playClickSound = (freq = 400) => {
-    try {
-      if (typeof window !== 'undefined' && window.AudioContext) {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.value = freq;
-        gain.gain.value = 0.04;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.04);
-      }
-    } catch {
-      // Audio fallback silent
+// AudioContext singleton untuk menghindari freeze/lag audio di Android & iOS
+let sharedAudioCtx = null;
+
+const playClickSound = (freq = 400) => {
+  try {
+    // Haptic vibration instan di HP Android (<1ms)
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(10);
     }
-  };
+
+    if (typeof window === 'undefined') return;
+    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtxClass) return;
+
+    if (!sharedAudioCtx) {
+      sharedAudioCtx = new AudioCtxClass();
+    }
+    if (sharedAudioCtx.state === 'suspended') {
+      sharedAudioCtx.resume();
+    }
+
+    const osc = sharedAudioCtx.createOscillator();
+    const gain = sharedAudioCtx.createGain();
+    osc.frequency.value = freq;
+    gain.gain.value = 0.02;
+    osc.connect(gain);
+    gain.connect(sharedAudioCtx.destination);
+    osc.start();
+    osc.stop(sharedAudioCtx.currentTime + 0.025);
+  } catch {
+    // Silent fallback
+  }
+};
 
   // Numpad Key Press Handler
   const handleKeyClick = (key) => {
@@ -530,9 +545,9 @@ export default function NumpadModal({
           </div>
         </div>
 
-        {/* 4. Tactile Numpad Grid */}
-        <div className="p-3 bg-slate-950 border-t border-slate-800">
-          <div className="grid grid-cols-3 gap-1.5 max-w-sm mx-auto">
+        {/* 4. Tactile Numpad Grid (Fast Response & Zero Touch Delay) */}
+        <div className="p-3 bg-slate-950 border-t border-slate-800 touch-manipulation select-none">
+          <div className="grid grid-cols-3 gap-1.5 max-w-sm mx-auto touch-manipulation">
             {['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', 'C'].map((k) => {
               const isClear = k === 'C';
               return (
@@ -540,10 +555,10 @@ export default function NumpadModal({
                   key={k}
                   type="button"
                   onClick={() => handleKeyClick(k)}
-                  className={`h-12 sm:h-13 rounded-xl text-xl sm:text-2xl font-mono font-bold transition-all border active:scale-95 flex items-center justify-center ${
+                  className={`h-12 sm:h-13 rounded-xl text-xl sm:text-2xl font-mono font-bold transition-transform duration-75 active:scale-95 flex items-center justify-center touch-manipulation select-none cursor-pointer ${
                     isClear
-                      ? 'bg-rose-950/40 text-rose-300 border-rose-800/60 hover:bg-rose-900/50'
-                      : 'bg-slate-800 hover:bg-slate-750 text-white border-slate-700/70 shadow-sm'
+                      ? 'bg-rose-950/40 text-rose-300 border border-rose-800/60 active:bg-rose-900/70'
+                      : 'bg-slate-800 active:bg-slate-700 text-white border border-slate-700/70 shadow-sm'
                   }`}
                 >
                   {k}
@@ -553,11 +568,11 @@ export default function NumpadModal({
           </div>
 
           {/* Backspace & Confirm Row */}
-          <div className="flex gap-2 mt-2 max-w-sm mx-auto">
+          <div className="flex gap-2 mt-2 max-w-sm mx-auto touch-manipulation">
             <button
               type="button"
               onClick={() => handleKeyClick('BACKSPACE')}
-              className="w-1/4 h-12 sm:h-13 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700/70 flex items-center justify-center active:scale-95 transition"
+              className="w-1/4 h-12 sm:h-13 rounded-xl bg-slate-800 active:bg-slate-700 text-slate-200 border border-slate-700/70 flex items-center justify-center active:scale-95 transition-transform duration-75 touch-manipulation select-none cursor-pointer"
               title="Hapus Digit Terakhir"
             >
               <Delete className="w-5 h-5 text-amber-400" />
@@ -567,9 +582,9 @@ export default function NumpadModal({
               type="button"
               disabled={netWeight <= 0}
               onClick={handleConfirm}
-              className={`flex-1 h-12 sm:h-13 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 border transition-all active:scale-[0.98] ${
+              className={`flex-1 h-12 sm:h-13 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 border transition-transform duration-75 active:scale-[0.98] touch-manipulation select-none ${
                 netWeight > 0
-                  ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/15'
+                  ? 'bg-emerald-500 active:bg-emerald-600 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/15'
                   : 'bg-slate-800 text-slate-500 border-slate-700/60 cursor-not-allowed opacity-50'
               }`}
             >

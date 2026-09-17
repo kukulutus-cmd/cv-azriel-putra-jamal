@@ -12,10 +12,17 @@ html, body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #0b111e;
   color: #f1f5f9;
-  touch-action: pan-x pan-y;
+  touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   overscroll-behavior: none;
+}
+
+button, input, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Tabular figures for numbers */
