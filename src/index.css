@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0b111e;
+  color: #f1f5f9;
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+/* Tabular figures for numbers */
+.font-mono, .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Smooth scrollbar removal */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ===================================================
+   THERMAL RECEIPT PRINTING STYLES (58mm ESC/POS)
+   =================================================== */
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0mm;
+  }
+
+  html, body {
+    width: 58mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible;
+  }
+
+  #printable-receipt {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    margin: 0 !important;
+    padding: 4mm 2mm !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+    color: black !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+}
