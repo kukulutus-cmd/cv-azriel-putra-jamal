@@ -174,7 +174,7 @@ export default function Transaction() {
   const customerDebt = selectedCustomer?.currentDebt || 0;
 
   return (
-    <div className="flex flex-col h-full space-y-3 pb-24 lg:pb-0">
+    <div className="flex flex-col h-full space-y-3 pb-40 lg:pb-0">
       {/* Top Header: Customer Selector Bar */}
       <div className="flex items-center justify-between gap-2 p-3 bg-slate-800/90 border border-slate-700/70 rounded-xl shadow-sm">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
@@ -269,14 +269,14 @@ export default function Transaction() {
         </div>
       </div>
 
-      {/* Mobile Floating Sticky Cart & Pay Bar */}
-      <div className="lg:hidden fixed bottom-[54px] left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-3 py-2 shadow-2xl">
+      {/* Mobile Floating Sticky Cart & Pay Bar (Positioned cleanly above bottom nav) */}
+      <div className="lg:hidden fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-30 bg-slate-900/98 backdrop-blur-md border-t border-slate-800 px-3 py-2 shadow-[0_-8px_20px_rgba(0,0,0,0.45)]">
         <div className="max-w-md mx-auto flex items-center justify-between gap-2.5">
           {/* Tapping left button opens Cart Drawer */}
           <button
             type="button"
             onClick={() => setIsMobileCartDrawerOpen(true)}
-            className="flex items-center gap-2.5 flex-1 py-1.5 px-3 rounded-xl bg-slate-800 border border-slate-700/80 hover:border-slate-600 transition active:scale-95 text-left min-w-0"
+            className="flex items-center gap-2.5 flex-1 py-1.5 px-3 rounded-xl bg-slate-800 border border-slate-700/80 hover:border-slate-600 transition active:scale-95 text-left min-w-0 shadow-sm"
           >
             <div className="relative w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 flex-shrink-0">
               <ShoppingCart className="w-4 h-4" />

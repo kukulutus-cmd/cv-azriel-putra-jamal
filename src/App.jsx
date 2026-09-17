@@ -50,7 +50,7 @@ export default function App() {
       </header>
 
       {/* Main Content View */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 pb-28 md:pb-8 overflow-x-hidden">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 pb-44 md:pb-8 overflow-x-hidden">
         {activeTab === 'POS' && <Transaction />}
         {activeTab === 'CUSTOMERS' && <Customers />}
         {activeTab === 'PRICES' && <PriceMaster />}
@@ -64,9 +64,9 @@ export default function App() {
         </footer>
       </main>
 
-      {/* Bottom Navigation: Clean & Comfortable */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/80 px-2 py-1.5 shadow-xl">
-        <div className="max-w-md md:max-w-2xl mx-auto grid grid-cols-4 gap-1">
+      {/* Bottom Navigation: Clean & Comfortable with fixed h-16 and safe-area */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/80 px-2 shadow-xl pb-[env(safe-area-inset-bottom,0px)]">
+        <div className="max-w-md md:max-w-2xl mx-auto h-16 grid grid-cols-4 gap-1 items-center">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -75,14 +75,14 @@ export default function App() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 active:scale-95 ${
+                className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-150 active:scale-95 ${
                   isActive
                     ? 'text-amber-400 bg-amber-500/10 font-bold'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium'
                 }`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.4]' : 'stroke-[1.8]'}`} />
-                <span className="text-[11px] mt-1 tracking-tight text-center leading-tight">
+                <span className="text-[10px] sm:text-[11px] mt-0.5 tracking-tight text-center leading-tight">
                   {item.label}
                 </span>
               </button>
