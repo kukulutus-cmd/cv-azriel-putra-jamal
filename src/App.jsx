@@ -23,9 +23,11 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           {/* Logo & Branding */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 shadow-md shadow-amber-500/15 flex-shrink-0">
-              <Scale className="w-5 h-5 stroke-[2.2]" />
-            </div>
+            <img
+              src="/bosjamal.jpg"
+              alt="CV. AZRIEL PUTRA JAMAL"
+              className="w-10 h-10 rounded-full object-cover border-2 border-amber-500/60 shadow-md shadow-amber-500/25 flex-shrink-0 bg-white"
+            />
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="text-sm sm:text-base font-black text-white leading-tight tracking-tight truncate">

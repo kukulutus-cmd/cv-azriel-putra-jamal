@@ -1,21 +1,24 @@
 {
-  "name": "POS LAPAK RONGSOK",
-  "short_name": "LapakPOS",
+  "name": "CV. AZRIEL PUTRA JAMAL",
+  "short_name": "AzrielPOS",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#020617",
   "theme_color": "#0f172a",
-  "description": "Sistem Kasir Cepat & Kas Bon Pengepul Rongsok Offline-First",
+  "description": "Sistem Kasir & Timbangan CV. AZRIEL PUTRA JAMAL - by K2C Komputindo",
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

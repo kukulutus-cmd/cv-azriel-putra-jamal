@@ -109,6 +109,13 @@ export default function ReceiptPrint({
           >
             {/* Header */}
             <div className="text-center pb-2 border-b border-dashed border-gray-400">
+              <div className="flex justify-center mb-1.5">
+                <img
+                  src="/bosjamal.jpg"
+                  alt="Logo CV. AZRIEL PUTRA JAMAL"
+                  className="w-14 h-14 rounded-full object-contain mx-auto border border-gray-300"
+                />
+              </div>
               <h2 className="font-extrabold text-xs uppercase tracking-wider">{lapakInfo.name}</h2>
               <p className="text-[10px] text-gray-700 font-sans">{lapakInfo.subTitle}</p>
               <p className="text-[9px] text-gray-600 mt-0.5 leading-snug">{lapakInfo.address}</p>
