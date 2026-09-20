@@ -19,11 +19,11 @@ export default function ItemGrid({ items = [], transactions = [], onSelectItem }
 
   // Prioritas default rongsok umum jika transaksi masih sedikit
   const DEFAULT_POPULAR = [
-    'Besi Tipis/Biasa',
-    'Besi Tebal/Super',
-    'Kardus Bersih',
-    'Alumunium Kaleng',
-    'Tembaga Biasa'
+    'Besi',
+    'Kr',
+    'TB',
+    'Siku A',
+    'Al tebel'
   ];
 
   // 2. Dapatkan 5 barang paling sering ditimbang

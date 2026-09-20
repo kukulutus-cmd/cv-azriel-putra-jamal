@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
-import { Tag, Plus, Edit2, Check, X, Search, Trash2 } from 'lucide-react';
+import { db, syncStandardItems } from '../db';
+import { Tag, Plus, Edit2, Check, X, Search, Trash2, RotateCcw, Sliders } from 'lucide-react';
 
 export default function PriceMaster() {
   const items = useLiveQuery(() => db.items.toArray(), []) || [];
@@ -17,6 +17,14 @@ export default function PriceMaster() {
   const [newCategory, setNewCategory] = useState('Besi');
   const [newPrice, setNewPrice] = useState('');
   const [newColorTag, setNewColorTag] = useState('#f59e0b');
+
+  // State Modal Edit Material Lengkap
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [itemBeingEdited, setItemBeingEdited] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [editColorTag, setEditColorTag] = useState('#f59e0b');
 
   // Extract unique categories
   const categories = ['ALL', ...Array.from(new Set(items.map((i) => i.category || 'Lainnya')))];
@@ -57,10 +65,42 @@ export default function PriceMaster() {
     }
   };
 
+  const openEditModal = (item) => {
+    setItemBeingEdited(item);
+    setEditName(item.name);
+    setEditCategory(item.category || '');
+    setEditPrice(item.currentPrice.toString());
+    setEditColorTag(item.colorTag || '#f59e0b');
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveFullEdit = async (e) => {
+    e.preventDefault();
+    if (!itemBeingEdited || !editName.trim() || !editPrice) return;
+
+    try {
+      await db.items.update(itemBeingEdited.id, {
+        name: editName.trim(),
+        category: editCategory.trim(),
+        currentPrice: parseFloat(editPrice),
+        colorTag: editColorTag
+      });
+      setIsEditModalOpen(false);
+      setItemBeingEdited(null);
+    } catch (err) {
+      console.error('Error updating item:', err);
+      alert('Gagal mengubah data material.');
+    }
+  };
+
   const handleDeleteItem = async (item) => {
     if (confirm(`Hapus material "${item.name}" dari daftar harga?`)) {
       try {
         await db.items.delete(item.id);
+        if (isEditModalOpen && itemBeingEdited?.id === item.id) {
+          setIsEditModalOpen(false);
+          setItemBeingEdited(null);
+        }
       } catch (err) {
         console.error('Error deleting item:', err);
         alert('Gagal menghapus material.');
@@ -89,13 +129,31 @@ export default function PriceMaster() {
     }
   };
 
+  const handleSyncStandard = async () => {
+    if (
+      confirm(
+        'Sinkronkan daftar harga dengan 19 material standar (Besi 5500, Kr 3800, KL 3000, TB 210000, Bc 225000, Kn 145000, Dang" 185000, Siku A/B, dll)?'
+      )
+    ) {
+      try {
+        await syncStandardItems(true);
+        alert('Daftar 19 material standar berhasil diperbarui!');
+      } catch (err) {
+        console.error('Error syncing:', err);
+        alert('Gagal sinkronisasi data.');
+      }
+    }
+  };
+
   const COLOR_PRESETS = [
     { label: 'Tembaga', color: '#b45309' },
     { label: 'Kuningan', color: '#eab308' },
     { label: 'Alumunium', color: '#0284c7' },
     { label: 'Besi', color: '#64748b' },
     { label: 'Kardus', color: '#854d0e' },
-    { label: 'Aki/Plastik', color: '#10b981' }
+    { label: 'Aki/Plastik', color: '#10b981' },
+    { label: 'Babet/Lainnya', color: '#475569' },
+    { label: 'Elemen/Spesial', color: '#8b5cf6' }
   ];
 
   return (
@@ -120,13 +178,24 @@ export default function PriceMaster() {
             </div>
           </div>
 
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-amber-500/15 active:scale-95 transition"
-          >
-            <Plus className="w-4 h-4 stroke-[2.6]" />
-            <span>+ MATERIAL BARU</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSyncStandard}
+              className="px-3 py-2 bg-slate-750 hover:bg-slate-700 text-slate-200 hover:text-amber-400 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 border border-slate-700/70 active:scale-95 transition"
+              title="Terapkan / Sinkronkan 19 Data Standar"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>SINKRON STANDAR</span>
+            </button>
+
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-amber-500/15 active:scale-95 transition"
+            >
+              <Plus className="w-4 h-4 stroke-[2.6]" />
+              <span>+ MATERIAL</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -197,8 +266,8 @@ export default function PriceMaster() {
 
                 {/* Harga Beli Display (Jika tidak sedang edit) */}
                 {!isEditing && (
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="text-right font-mono">
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <div className="text-right font-mono mr-1">
                       <div className="text-base sm:text-lg font-black text-emerald-400 leading-none tabular-nums">
                         Rp {Number(item.currentPrice).toLocaleString('id-ID')}
                       </div>
@@ -207,10 +276,20 @@ export default function PriceMaster() {
                       </span>
                     </div>
 
+                    {/* Quick Stepper Toggle */}
                     <button
                       onClick={() => startEditPrice(item)}
-                      className="p-2 bg-slate-750 hover:bg-slate-700 text-slate-200 hover:text-amber-400 rounded-xl border border-slate-700/70 active:scale-95 transition"
-                      title="Ubah Tarif Beli"
+                      className="px-2 py-1.5 bg-slate-750 hover:bg-slate-700 text-slate-300 hover:text-amber-400 rounded-xl border border-slate-700/70 active:scale-95 transition text-xs font-mono font-bold"
+                      title="Ubah Cepat Tarif (Stepper)"
+                    >
+                      Rp±
+                    </button>
+
+                    {/* Full Edit Modal */}
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="p-2 bg-slate-750 hover:bg-slate-700 text-slate-300 hover:text-amber-400 rounded-xl border border-slate-700/70 active:scale-95 transition"
+                      title="Edit Detail Material (Nama, Kategori, Harga, Warna)"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
@@ -411,6 +490,132 @@ export default function PriceMaster() {
                 >
                   Simpan Material
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Material Lengkap */}
+      {isEditModalOpen && itemBeingEdited && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800 bg-slate-950/80">
+              <div className="flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-amber-400" />
+                <h3 className="font-bold text-white text-sm sm:text-base">
+                  Edit Material: {itemBeingEdited.name}
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setItemBeingEdited(null);
+                }}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveFullEdit} className="p-4 space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1">
+                  Nama Material / Barang *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Besi, Kr, TB, Siku A"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full p-2.5 bg-slate-850 border border-slate-700/80 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:border-amber-500 transition"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">
+                    Kategori *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Besi / Tembaga / Alumunium"
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    className="w-full p-2.5 bg-slate-850 border border-slate-700/80 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:border-amber-500 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">
+                    Harga Beli/kg (Rp) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="100"
+                    step="100"
+                    placeholder="Contoh: 15000"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full p-2.5 bg-slate-850 border border-slate-700/80 rounded-xl text-white text-xs sm:text-sm font-mono font-bold focus:outline-none focus:border-amber-500 tabular-nums transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1.5">
+                  Warna Indikator Kartu
+                </label>
+                <div className="flex gap-2.5 items-center flex-wrap">
+                  {COLOR_PRESETS.map((preset) => (
+                    <button
+                      key={preset.color}
+                      type="button"
+                      onClick={() => setEditColorTag(preset.color)}
+                      style={{ backgroundColor: preset.color }}
+                      className={`w-7 h-7 rounded-xl border-2 transition ${
+                        editColorTag === preset.color
+                          ? 'border-white scale-110 shadow-md ring-2 ring-amber-400/40'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                      title={preset.label}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteItem(itemBeingEdited)}
+                  className="py-2.5 px-3 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 font-bold rounded-xl text-xs flex items-center gap-1.5 border border-rose-500/40 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Hapus</span>
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditModalOpen(false);
+                      setItemBeingEdited(null);
+                    }}
+                    className="py-2.5 px-4 bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold rounded-xl text-xs transition"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-md shadow-amber-500/10 active:scale-95 transition"
+                  >
+                    Simpan Perubahan
+                  </button>
+                </div>
               </div>
             </form>
           </div>
